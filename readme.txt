@@ -15,7 +15,7 @@ Currently:
 
 * A shortcode for "heartrate" which takes a "date" parameter and prints a simple list of time spent in each heart rate zone for the day
 * A shortcode for "steps" which prints a graph of steps taken over a 7 day period before the given "date"
-* A shortcake for "goals" which prints a table of daily and weekly goals
+* A shortcode for "goals" which prints a table of daily and weekly goals
 See the "Usage" section for an example.
 
 The hope is that eventually this plugin will provide the following functionality:
@@ -44,9 +44,13 @@ Gosh: [fp_goals]
 
 == Changelog ==
 
+= 0.4 =
+Fixed bug in steps shortcode preventing empty date fields.
+Fixed bug in heartrate shortcode preventing empty date fields.
+
 = 0.3 =
 
-Added shortcake to show goals
+Added shortcode to show goals
 Added shortcode for displaying FitBit account linking on posts
 Added support for custom redirect after linking
 Added support for multiple users (theoretically)

@@ -50,7 +50,7 @@ class FitPress {
 	 * Shortcodes
 	 **/ 
 
-	//[heartrate]
+	//[fp_goals]
 	function fitpress_shortcode_goals( $atts ){
 		if (is_user_logged_in()){
 			
@@ -95,7 +95,7 @@ class FitPress {
 		}
 	}
 
-	//[]
+	//[heartrate]
 	function fitpress_shortcode_heartrate( $atts ){
 		if (is_user_logged_in()){
 			$user_id = get_current_user_id();
@@ -106,7 +106,19 @@ class FitPress {
 				$fitbit = $this->get_fitbit_client();
 
 				try {
-					$result = $fitbit->get_heart_rate($atts['date']);
+
+					if (array_key_exists('date',$atts) && $atts['date']){
+						if (is_string($atts['date'])){
+							$result = $fitbit->get_heart_rate($atts['date']);
+						}
+						else{
+							$result = $fitbit->get_heart_rate($atts['date']->format('Y-m-d'));
+						}
+					}
+					else{
+						$output.='generated';
+						$result = $fitbit->get_heart_rate(date("Y-m-d"));
+					}
 					$output = '<dl>';
 					foreach ($result->value->heartRateZones as $heartRateZone) {
 						$name = $heartRateZone->name;
@@ -134,8 +146,20 @@ class FitPress {
 				$fitbit = $this->get_fitbit_client();
 
 				try {
-					$steps = $fitbit->get_time_series('steps', $atts['date'], '7d');
+					$output = '';
 
+					if (array_key_exists('date',$atts) && $atts['date']){
+						if (is_string($atts['date'])){
+							$steps = $fitbit->get_time_series('steps', $atts['date'], '7d');
+						}
+						else{
+							$steps = $fitbit->get_time_series('steps', $atts['date']->format('Y-m-d'), '7d');
+						}
+					}
+					else{
+						$output.='generated';
+						$steps = $fitbit->get_time_series('steps', date("Y-m-d"), '7d');
+					}
 					array_walk($steps, function (&$v, $k) { $v = array($v->dateTime, intval($v->value)); });
 
 					// add header
@@ -143,7 +167,6 @@ class FitPress {
 
 					$steps_json = json_encode($steps);
 
-					$output = '';
 					$output .= <<<ENDHTML
 		<script type="text/javascript">
 			google.load('visualization', '1.0', {'packages':['corechart', 'bar']});
