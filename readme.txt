@@ -39,7 +39,7 @@ My heart rate: [heartrate date="2015-12-04"]
 
 Steps: [steps date="2015-12-04"]
 
-Gosh: [fp_goals]
+Goals: [fp_goals]
 ```
 
 == Changelog ==
