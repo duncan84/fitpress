@@ -1,5 +1,5 @@
 === FitPress ===
-Contributors: Daniel Walmsley
+Contributors: Daniel Walmsley, Duncan Bell
 Tags: fitness, fitpress, fitbit
 Requires at least: 3.0.1
 Tested up to: 4.1
@@ -15,7 +15,7 @@ Currently:
 
 * A shortcode for "heartrate" which takes a "date" parameter and prints a simple list of time spent in each heart rate zone for the day
 * A shortcode for "steps" which prints a graph of steps taken over a 7 day period before the given "date"
-
+* A shortcake for "goals" which prints a table of daily and weekly goals
 See the "Usage" section for an example.
 
 The hope is that eventually this plugin will provide the following functionality:
@@ -38,9 +38,18 @@ The hope is that eventually this plugin will provide the following functionality
 My heart rate: [heartrate date="2015-12-04"]
 
 Steps: [steps date="2015-12-04"]
+
+Gosh: [fp_goals]
 ```
 
 == Changelog ==
+
+= 0.3 =
+
+Added shortcake to show goals
+Added shortcode for displaying FitBit account linking on posts
+Added support for custom redirect after linking
+Added support for multiple users (theoretically)
 
 = 0.2 =
 

@@ -17,6 +17,14 @@ class FitBit_API_Client {
 		return $this->get( "/1/user/-/activities/heart/date/".urlencode($date)."/1d.json" )->{'activities-heart'}[0];
 	}
 
+	public function get_goals($period) {
+		$period_val="daily";
+		if ($period=="weekly"){
+			$period_val = "weekly";
+		}
+		return $this->get( "/1/user/-/activities/goals/".$period_val.".json")->{'goals'};
+	}
+
 	public function get_time_series($series_type, $end_date, $range) {
 		return $this->get( "/1/user/-/activities/".urlencode($series_type)."/date/".urlencode($end_date)."/".urlencode($range).".json")->{"activities-$series_type"};
 	}

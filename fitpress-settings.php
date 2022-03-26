@@ -23,18 +23,19 @@
 			</tr>
 
 			<tr valign='top'>
+			<th scope='row'>Redirect Url:</th>
+			<td>
+				<input type='text' name='fitpress_redirect' value='<?php echo get_option('fitpress_redirect'); ?>' />
+			</td>
+			</tr>
+
+			<tr valign='top'>
 			<th scope='row'>Debug access token:</th>
 			<td>
 				<input type='text' name='fitpress_token_override' value='<?php echo get_option('fitpress_token_override'); ?>' />
 			</td>
 			</tr>
 			
-			<tr valign='top'>
-			<th scope='row'>WordPress user_id for whom to show stats:</th>
-			<td>
-				<input type='text' name='fitpress_user' value='<?php echo get_option('fitpress_user'); ?>' />
-			</td>
-			</tr>
 		</table> <!-- .form-table -->
 		<p>
 			<strong>Instructions:</strong>
