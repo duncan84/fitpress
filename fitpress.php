@@ -37,19 +37,82 @@ class FitPress {
 		add_shortcode( 'fitpress_profile', array($this, 'fitpress_linked_accounts') );
 		add_shortcode( 'heartrate', array($this, 'fitpress_shortcode_heartrate') );
 		add_shortcode( 'fp_goals', array($this, 'fitpress_shortcode_goals') );
+		add_shortcode( 'fp_badges', array($this, 'fitpress_shortcode_badges') );
 		add_shortcode( 'steps', array($this, 'fitpress_shortcode_steps') );
 		wp_register_script( 'jsapi', 'https://www.google.com/jsapi' );
 		add_action( 'wp_enqueue_scripts', array($this, 'fitpress_scripts') );
 	}
-
 	function fitpress_scripts() {
 		wp_enqueue_script( 'jsapi' );
+        wp_register_style( 'fitpress', plugins_url( 'fitpress/fitpress.css' ) );
+        wp_enqueue_style( 'fitpress' );
 	}
 
 	/**
-	 * Shortcodes
+	 * Shortcodes 
 	 **/ 
 
+	function fitpress_shortcode_badges( $atts ){
+		if (is_user_logged_in()){
+			
+			$user_id = get_current_user_id();
+			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
+			if ($fitpress_credentials){
+				$atts = $this->fitpress_shortcode_base( $atts );
+
+				$fitbit = $this->get_fitbit_client();
+				try {
+					$result = $fitbit->get_badges();
+					/*$badges='[ {
+					"badgeGradientEndColor": "FF677C",
+					"badgeGradientStartColor": "D24958",
+					"badgeType": "DAILY_STEPS",
+					"category": "Daily Steps",
+					"cheers": [],
+					"dateTime": "2016-07-17",
+					"description": "35,000 steps in a day",
+					"earnedMessage": "Congrats on earning your first Hiking Boot badge!",
+					"encodedId": "GGNJL9",
+					"image100px": "https://static0.fitbit.com/images/badges_new/100px/badge_daily_steps35k.png",
+					"image125px": "https://static0.fitbit.com/images/badges_new/125px/badge_daily_steps35k.png",
+					"image300px": "https://static0.fitbit.com/images/badges_new/300px/badge_daily_steps35k.png",
+					"image50px": "https://static0.fitbit.com/images/badges_new/badge_daily_steps35k.png",
+					"image75px": "https://static0.fitbit.com/images/badges_new/75px/badge_daily_steps35k.png",
+					"marketingDescription": "You\'ve walked 35,000 steps  And earned the Hiking Boot badge!",
+					"mobileDescription": "Woot, woot! There\'s no mountain you can\'t climb and no goal you can\'t get.",
+					"name": "Hiking Boot (35,000 steps in a day)",
+					"shareImage640px": "https://static0.fitbit.com/images/badges_new/386px/shareLocalized/en_US/badge_daily_steps35k.png",
+					"shareText": "I took 35,000 steps and earned the Hiking Boot badge! #Fitbit",
+					"shortDescription": "35,000 steps",
+					"shortName": "Hiking Boot",
+					"timesAchieved": 1,
+					"value": 35000
+					}]';
+					$result=json_decode($badges);*/
+					$output="<div class='fp-badge-container'>".
+							"<span class='fp-title'>Badges</span>";
+					$total=count($result);
+					if ($total>0){
+						for ($i=0;$i<count($result);$i++){
+							$row=$result[$i];
+							$output.="<div class='fp-badge'>";
+							$output.="<img src='".$row->image125px."' alt='".$row->description."' />";
+							$output.="<p class='fp-badge-title'>".$row->name."</p>";
+							$output.="</div>";
+						}
+					}
+					else{
+						$output.="<span class='fp-title'>No badges... yet!</span>";
+					}
+					$output.="</div><br clear='all' />";
+					return $output;
+				} catch(Exception $e) {
+					return print_r($e->getMessage(), true);
+				}
+			}
+		}
+	}
+	 
 	//[fp_goals]
 	function fitpress_shortcode_goals( $atts ){
 		if (is_user_logged_in()){

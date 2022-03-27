@@ -17,6 +17,10 @@ class FitBit_API_Client {
 		return $this->get( "/1/user/-/activities/heart/date/".urlencode($date)."/1d.json" )->{'activities-heart'}[0];
 	}
 
+	public function get_badges(){
+		return $this->get( "/1/user/-/badges.json")->{'badges'};
+	}
+
 	public function get_goals($period) {
 		$period_val="daily";
 		if ($period=="weekly"){
@@ -217,6 +221,7 @@ class FitBit_OAuth2_Client {
 				'redirect_uri' => $this->redirect_uri,
 				'code' => $authorization_code,
 				'grant_type' => 'authorization_code',
+				'expires_in' => 31536000
 			) ),
 		) );
 
