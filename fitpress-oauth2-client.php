@@ -9,6 +9,10 @@ class FitBit_API_Client {
 		$this->auth_token = $auth_token;
 	}
 
+	public function get_activities($date){
+		return $this->get( "/1/user/-/activities/date/".urlencode($date).".json" );
+	}
+
 	public function get_current_user_info() {
 		return $this->get( '/1/user/-/profile.json' )->user;
 	}

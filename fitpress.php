@@ -36,8 +36,10 @@ class FitPress {
 		// add_shortcode( 'fitbit', array($this, 'fitpress_shortcode') );
 		add_shortcode( 'fitpress_profile', array($this, 'fitpress_linked_accounts') );
 		add_shortcode( 'heartrate', array($this, 'fitpress_shortcode_heartrate') );
+		add_shortcode( 'fp_profile', array($this, 'fitpress_shortcode_profile') );
 		add_shortcode( 'fp_goals', array($this, 'fitpress_shortcode_goals') );
 		add_shortcode( 'fp_badges', array($this, 'fitpress_shortcode_badges') );
+		add_shortcode( 'fp_activities', array($this, 'fitpress_shortcode_activities') );
 		add_shortcode( 'steps', array($this, 'fitpress_shortcode_steps') );
 		wp_register_script( 'jsapi', 'https://www.google.com/jsapi' );
 		add_action( 'wp_enqueue_scripts', array($this, 'fitpress_scripts') );
@@ -51,7 +53,70 @@ class FitPress {
 	/**
 	 * Shortcodes 
 	 **/ 
+	function fitpress_shortcode_profile( $atts ){
+		if (is_user_logged_in()){
+			$user_id = get_current_user_id();
+			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
+			if ($fitpress_credentials){
+				$atts = $this->fitpress_shortcode_base( $atts );
 
+				$fitbit = $this->get_fitbit_client();
+				try {
+					$output="";
+					$result = $fitbit->get_current_user_info($date);
+					$name=$result->fullName;
+					$aboutMe=$result->aboutMe;
+					$avatar=$result->avatar;
+					$output = "<div class='fp-badge-container'>".
+					"<span class='fp-title'>".$name."</span>";
+					$output.="<div class='fp-badge'>";
+					$output.="<img src='".$avatar."' alt='".$name."' />";
+					$output.="<p class='fp-badge-title'>".$aboutMe."</p>";
+					$output.="</div>";
+					$output.="</div>";
+					return $output;
+				} catch(Exception $e) {
+					return print_r($e->getMessage(), true);
+				}
+			}
+		}
+	}
+
+
+	 //Activities
+	function fitpress_shortcode_activities( $atts ){
+		if (is_user_logged_in()){
+			$user_id = get_current_user_id();
+			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
+			if ($fitpress_credentials){
+				$atts = $this->fitpress_shortcode_base( $atts );
+
+				$fitbit = $this->get_fitbit_client();
+				try {
+					$output="";
+					$date = date('Y-m-d');
+					$result = $fitbit->get_activities($date);
+					$output = "<table>";
+					$output .= "<tr><th>Calories Burned</th><td width='10'></td>".
+								"<td>".$result->summary->caloriesBMR."</td></tr>";
+					$output .= "<tr><th>Floors</th><td width='10'></td>".
+								"<td>".$result->summary->floors."</td></tr>";
+					$output .= "<tr><th>Steps</th><td width='10'></td>".
+								"<td>".$result->summary->steps."</td></tr>";
+					$output .= "<tr><th>Resting Heartrate</th><td width='10'></td>".
+								"<td>".$result->summary->restingHeartRate."</td></tr>";
+					$output .= "<tr><th>Distance</th><td width='10'></td>".
+								"<td>".$result->summary->distances[0]->distance."</td></tr>";
+					$output .= '</table>';
+					return $output;
+				} catch(Exception $e) {
+					return print_r($e->getMessage(), true);
+				}
+			}
+		}
+	}
+
+	 //badges
 	function fitpress_shortcode_badges( $atts ){
 		if (is_user_logged_in()){
 			
@@ -63,32 +128,6 @@ class FitPress {
 				$fitbit = $this->get_fitbit_client();
 				try {
 					$result = $fitbit->get_badges();
-					/*$badges='[ {
-					"badgeGradientEndColor": "FF677C",
-					"badgeGradientStartColor": "D24958",
-					"badgeType": "DAILY_STEPS",
-					"category": "Daily Steps",
-					"cheers": [],
-					"dateTime": "2016-07-17",
-					"description": "35,000 steps in a day",
-					"earnedMessage": "Congrats on earning your first Hiking Boot badge!",
-					"encodedId": "GGNJL9",
-					"image100px": "https://static0.fitbit.com/images/badges_new/100px/badge_daily_steps35k.png",
-					"image125px": "https://static0.fitbit.com/images/badges_new/125px/badge_daily_steps35k.png",
-					"image300px": "https://static0.fitbit.com/images/badges_new/300px/badge_daily_steps35k.png",
-					"image50px": "https://static0.fitbit.com/images/badges_new/badge_daily_steps35k.png",
-					"image75px": "https://static0.fitbit.com/images/badges_new/75px/badge_daily_steps35k.png",
-					"marketingDescription": "You\'ve walked 35,000 steps  And earned the Hiking Boot badge!",
-					"mobileDescription": "Woot, woot! There\'s no mountain you can\'t climb and no goal you can\'t get.",
-					"name": "Hiking Boot (35,000 steps in a day)",
-					"shareImage640px": "https://static0.fitbit.com/images/badges_new/386px/shareLocalized/en_US/badge_daily_steps35k.png",
-					"shareText": "I took 35,000 steps and earned the Hiking Boot badge! #Fitbit",
-					"shortDescription": "35,000 steps",
-					"shortName": "Hiking Boot",
-					"timesAchieved": 1,
-					"value": 35000
-					}]';
-					$result=json_decode($badges);*/
 					$output="<div class='fp-badge-container'>".
 							"<span class='fp-title'>Badges</span>";
 					$total=count($result);
@@ -104,7 +143,7 @@ class FitPress {
 					else{
 						$output.="<span class='fp-title'>No badges... yet!</span>";
 					}
-					$output.="</div><br clear='all' />";
+					$output.="</div>";
 					return $output;
 				} catch(Exception $e) {
 					return print_r($e->getMessage(), true);
@@ -138,17 +177,18 @@ class FitPress {
 				try {
 					$result = $fitbit->get_goals("daily");
 					$resultWeekly = $fitbit->get_goals("weekly");
-					$output = "<table><tr><td></td><th>Daily Goals:</th><th>Weekly Goals:</th></tr>";
+					$output = "<table><tr><td></td><td width='10' rowspan='6'></td>".
+					"<th>Daily Goals:</th><td width='10' rowspan='6'></td><th>Weekly Goals:</th></tr>";
 					$output .= "<tr><th>Active Minutes</th><td>".$result->activeMinutes." minutes</td>";
 					$output .= "<td>".$resultWeekly->activeMinutes." minutes</td></tr>";
 					$output .= "<tr><th>Calories Out</th><td>".$result->caloriesOut."</td>";
 					$output .= "<td>".$resultWeekly->caloriesOut."</td></tr>";
-					$output .= "<tr><th>Distance</th><td>".$result->distance." minutes</td>";
-					$output .= "<td>".$resultWeekly->distance." minutes</td></tr>";
-					$output .= "<tr><th>Floors</th><td>".$result->floors." minutes</td>";
-					$output .= "<td>".$resultWeekly->floors." minutes</td></tr>";
-					$output .= "<tr><th>Steps</th><td>".$result->steps." minutes</td>";
-					$output .= "<td>".$resultWeekly->steps." minutes</td></tr>";
+					$output .= "<tr><th>Distance</th><td>".$result->distance." mi</td>";
+					$output .= "<td>".$resultWeekly->distance." mi</td></tr>";
+					$output .= "<tr><th>Floors</th><td>".$result->floors." floors</td>";
+					$output .= "<td>".$resultWeekly->floors." floors</td></tr>";
+					$output .= "<tr><th>Steps</th><td>".$result->steps." steps</td>";
+					$output .= "<td>".$resultWeekly->steps." steps</td></tr>";
 					$output .= '</table>';
 					return $output;
 				} catch(Exception $e) {
@@ -182,13 +222,13 @@ class FitPress {
 						$output.='generated';
 						$result = $fitbit->get_heart_rate(date("Y-m-d"));
 					}
-					$output = '<dl>';
+					$output = "<table><tr><th>Heart Rate Zone</th><td width='10'</td><th>Minutes</th></tr>";
 					foreach ($result->value->heartRateZones as $heartRateZone) {
 						$name = $heartRateZone->name;
 						$minutes = $heartRateZone->minutes;
-						$output .= "<dt>{$name}</dt><dd>{$minutes} minutes</dd>";
+						$output .= "<tr><td>{$name}</td><td></td><td>{$minutes} minutes</td></tr>";
 					}
-					$output .= '</dl>';
+					$output .= '</table>';
 					return $output;
 				} catch(Exception $e) {
 					return print_r($e->getMessage(), true);

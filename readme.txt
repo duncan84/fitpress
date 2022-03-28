@@ -13,6 +13,9 @@ Publish your FitBit statistics on your WordPress blog.
 
 Currently:
 
+* A shortcode for "fp_badges" which displays user badges
+* A shortcode for "fp_profile" which displays the user avater and basic profile info
+* A shortcode for "fitpress_profile" which allows user to link Fitbit account (should be merged with above)
 * A shortcode for "heartrate" which takes a "date" parameter and prints a simple list of time spent in each heart rate zone for the day
 * A shortcode for "steps" which prints a graph of steps taken over a 7 day period before the given "date"
 * A shortcode for "goals" which prints a table of daily and weekly goals
@@ -40,9 +43,17 @@ My heart rate: [heartrate date="2015-12-04"]
 Steps: [steps date="2015-12-04"]
 
 Goals: [fp_goals]
+
+Badges: [fp_badges]
+
+Activites: [fp_activites]
 ```
 
 == Changelog ==
+
+= 0.5 =
+Added fp_profile shortcode to display Fitbit profile avatar and info.
+Added fp_activites for daily summaries
 
 = 0.4 =
 Fixed bug in steps shortcode preventing empty date fields.
