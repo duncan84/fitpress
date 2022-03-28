@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: FitPress
-Version: 0.2-alpha
+Version: 0.5-alpha
 Description: Publish your FitBit statistics on your WordPress blog
 Author: Daniel Walmsley
 Author URI: http://danwalmsley.com
