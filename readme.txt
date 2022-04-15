@@ -42,6 +42,8 @@ My heart rate: [heartrate date="2015-12-04"]
 
 Steps: [steps date="2015-12-04"]
 
+Nutrition Info: [fp_nutrition_info date="2015-12-04" data_type="water|caloriesIn"]
+
 Goals: [fp_goals]
 
 Badges: [fp_badges]
@@ -50,6 +52,9 @@ Activites: [fp_activites]
 ```
 
 == Changelog ==
+
+= 0.6 = 
+Added fp_nutrition_info shortcode to display nutrition info
 
 = 0.5 =
 Added fp_profile shortcode to display Fitbit profile avatar and info.

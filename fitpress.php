@@ -1,16 +1,16 @@
 <?php
 /*
 Plugin Name: FitPress
-Version: 0.5-alpha
+Version: 0.6-alpha
 Description: Publish your FitBit statistics on your WordPress blog
-Author: Daniel Walmsley
-Author URI: http://danwalmsley.com
-Plugin URI: http://github.com/gravityrail/fitpress
+Author: Duncan Bell, Daniel Walmsley
+Author URI: https://duncanbell.ca
+Plugin URI: https://github.com/duncan84/fitpress
 Text Domain: fitpress
 Domain Path: /languages
 */
 
-define( 'FITPRESS_CLIENT_STATE_KEY', 'this is super secret' );
+define( 'FITPRESS_CLIENT_STATE_KEY', 'this should be replace prior to uploading' );
 
 class FitPress {
 	// singleton class pattern:
@@ -40,6 +40,7 @@ class FitPress {
 		add_shortcode( 'fp_goals', array($this, 'fitpress_shortcode_goals') );
 		add_shortcode( 'fp_badges', array($this, 'fitpress_shortcode_badges') );
 		add_shortcode( 'fp_activities', array($this, 'fitpress_shortcode_activities') );
+		add_shortcode( 'fp_nutrition_info', array($this, 'fitpress_shortcode_nutrition') );
 		add_shortcode( 'steps', array($this, 'fitpress_shortcode_steps') );
 		wp_register_script( 'jsapi', 'https://www.google.com/jsapi' );
 		add_action( 'wp_enqueue_scripts', array($this, 'fitpress_scripts') );
@@ -162,18 +163,6 @@ class FitPress {
 				$atts = $this->fitpress_shortcode_base( $atts );
 
 				$fitbit = $this->get_fitbit_client();
-				/*
-					Example Response
-					{
-						"goals": {
-							"activeMinutes": 30,
-							"caloriesOut": 1950,
-							"distance": 8.05,
-							"floors": 10,
-							"steps": 7500
-						}
-					}
-				*/
 				try {
 					$result = $fitbit->get_goals("daily");
 					$resultWeekly = $fitbit->get_goals("weekly");
@@ -237,6 +226,77 @@ class FitPress {
 		}
 	}
 	
+	function fitpress_shortcode_nutrition($atts){
+		if (is_user_logged_in()){
+			$user_id=get_current_user_id();
+			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
+			if ($fitpress_credentials){
+				$atts = $this->fitpress_shortcode_base( $atts );
+				$fitbit = $this->get_fitbit_client();
+				$date; 
+				$data_type="caloriesIn";
+				if (array_key_exists('data',$atts) && $atts['data']){
+					$data_type=$atts['data'];
+				}
+				if (array_key_exists('date',$atts) && $atts['date']){
+					if (is_string($atts['date'])){
+						$date=$atts['date'];
+					}
+					else{
+						$date=$atts['date']->format('Y-m-d');
+					}
+				}
+				try{
+					$nutrition_info = $fitbit->get_nutrition_series_log($date,$data_type);
+					array_walk($nutrition_info, function (&$v, $k) { $v = array($v->dateTime, intval($v->value)); });
+					$column="Calories";
+					$title="'Calories per day'";
+					$y_title="'Calories'";
+
+					if ($data_type=="water"){
+						$column="Water";
+						$title="'Water per day'";
+						$y_title="'Water'";
+
+					}
+
+
+					// add header
+					array_unshift($nutrition_info, array('Date', $column));
+
+					$nutrition_info_json = json_encode($nutrition_info);
+
+					$output .= <<<ENDHTML
+		<script type="text/javascript">
+			google.load('visualization', '1.0', {'packages':['corechart', 'bar']});
+			google.setOnLoadCallback(function() {
+				var data = google.visualization.arrayToDataTable({$nutrition_info_json});
+				var options = {
+					title: {$title},
+					hAxis: {
+					title: 'Date',
+					format: 'Y-m-d'
+					},
+					vAxis: {
+					title: {$y_title}
+					}
+				};
+				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+				chart.draw(data, options);
+			});
+
+		</script>
+		<div id="chart_div"></div>
+		ENDHTML;
+
+					// $output = print_r($steps, true);
+					return $output;
+				} catch(Exception $e) {
+					return print_r($e->getMessage(), true);
+				}
+			}
+		}
+	}
 
 	//[steps]
 	function fitpress_shortcode_steps( $atts ){
@@ -306,6 +366,7 @@ class FitPress {
 	function fitpress_shortcode_base( $atts ) {
 		$atts = shortcode_atts( array(
 		    'date' => null
+			, 'data' => null
 		), $atts );
 
 		// we only compute this if not supplied because it's expensive to compute

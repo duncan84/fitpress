@@ -17,6 +17,17 @@ class FitBit_API_Client {
 		return $this->get( '/1/user/-/profile.json' )->user;
 	}
 
+	public function get_nutrition_series_log($date,$resource) {
+		$data_type="caloriesIn";
+		$ret_key="foods-log-caloriesIn";
+		if ($resource=="water"){
+			$data_type="water";
+			$ret_key="foods-log-water";
+
+		}
+		return $this->get( "/1/user/-/foods/log/".$data_type."/date/".urlencode($date)."/7d.json" )->{$ret_key};
+	}
+
 	public function get_heart_rate($date) {
 		return $this->get( "/1/user/-/activities/heart/date/".urlencode($date)."/1d.json" )->{'activities-heart'}[0];
 	}
@@ -97,7 +108,7 @@ class FitBit_OAuth2_Client {
 	const EMPTY_STATE = 2;
 	const INVALID_STATE = 4;
 	const DEFAULT_TIME_WINDOW = 21600; //3600 * 6
-	const OAUTH_SCOPES = ['activity', 'heartrate', 'location', 'profile', 'settings', 'sleep', 'social', 'weight'];
+	const OAUTH_SCOPES = ['activity', 'heartrate', 'nutrition','location', 'profile', 'settings', 'sleep', 'social', 'weight'];
 
 	private $id = '';
 	private $secret = '';
