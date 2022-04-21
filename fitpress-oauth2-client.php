@@ -28,6 +28,12 @@ class FitBit_API_Client {
 		return $this->get( "/1/user/-/foods/log/".$data_type."/date/".urlencode($date)."/7d.json" )->{$ret_key};
 	}
 
+	public function get_body_time_series($series_type, $date, $range) {
+		///1/user/[user-id]/body/[resource]/date/[date]/[period].json
+		$ret=$this->get( "/1/user/-/body/".urlencode($series_type)."/date/".urlencode($date)."/".urlencode($range).".json");
+		return $ret->{"body-$series_type"};
+	}
+
 	public function get_heart_rate($date) {
 		return $this->get( "/1/user/-/activities/heart/date/".urlencode($date)."/1d.json" )->{'activities-heart'}[0];
 	}

@@ -42,6 +42,16 @@ My heart rate: [heartrate date="2015-12-04"]
 
 Steps: [steps date="2015-12-04"]
 
+Distance: [fp_distance date="2022-01-01"]
+
+Calories: [fp_calories date="2022-01-01"]
+
+BMI: [fp_bmi date="2022-01-01"]
+
+Fat: [fp_fat date="2022-01-01"]
+
+Weight: [fp_weight date="2022-01-01"]
+
 Nutrition Info: [fp_nutrition_info date="2015-12-04" data_type="water|caloriesIn"]
 
 Goals: [fp_goals]
@@ -55,6 +65,8 @@ Activites: [fp_activites]
 
 = 0.6 = 
 Added fp_nutrition_info shortcode to display nutrition info
+Added fp_distance shortcode to display distance info
+Added fp_calories shortcode to display daily calorie info
 
 = 0.5 =
 Added fp_profile shortcode to display Fitbit profile avatar and info.

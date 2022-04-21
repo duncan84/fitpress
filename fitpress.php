@@ -41,6 +41,13 @@ class FitPress {
 		add_shortcode( 'fp_badges', array($this, 'fitpress_shortcode_badges') );
 		add_shortcode( 'fp_activities', array($this, 'fitpress_shortcode_activities') );
 		add_shortcode( 'fp_nutrition_info', array($this, 'fitpress_shortcode_nutrition') );
+		add_shortcode( 'fp_distance', array($this,'fitpress_shortcode_distance'));
+		add_shortcode( 'fp_calories', array($this,'fitpress_shortcode_calories'));
+		add_shortcode( 'fp_bmi', array($this,'fitpress_shortcode_bmi'));
+		add_shortcode( 'fp_weight', array($this,'fitpress_shortcode_weight'));
+		add_shortcode( 'fp_fat', array($this,'fitpress_shortcode_fat'));
+
+		
 		add_shortcode( 'steps', array($this, 'fitpress_shortcode_steps') );
 		wp_register_script( 'jsapi', 'https://www.google.com/jsapi' );
 		add_action( 'wp_enqueue_scripts', array($this, 'fitpress_scripts') );
@@ -281,12 +288,12 @@ class FitPress {
 					title: {$y_title}
 					}
 				};
-				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+				var chart = new google.visualization.ColumnChart(document.getElementById('{$data_type}'));
 				chart.draw(data, options);
 			});
 
 		</script>
-		<div id="chart_div"></div>
+		<div id="chart_div_{$data_type}"></div>
 		ENDHTML;
 
 					// $output = print_r($steps, true);
@@ -297,9 +304,10 @@ class FitPress {
 			}
 		}
 	}
+	//Body base request 
 
-	//[steps]
-	function fitpress_shortcode_steps( $atts ){
+	function fitpress_load_body_series($atts, $data_type){
+
 		if (is_user_logged_in()){
 			$user_id = get_current_user_id();
 			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
@@ -307,59 +315,151 @@ class FitPress {
 				$atts = $this->fitpress_shortcode_base( $atts );
 
 				$fitbit = $this->get_fitbit_client();
-
+				$data_title=ucwords($data_type);
 				try {
 					$output = '';
 
 					if (array_key_exists('date',$atts) && $atts['date']){
 						if (is_string($atts['date'])){
-							$steps = $fitbit->get_time_series('steps', $atts['date'], '7d');
+							$result = $fitbit->get_body_time_series($data_type, $atts['date'], '7d');
 						}
 						else{
-							$steps = $fitbit->get_time_series('steps', $atts['date']->format('Y-m-d'), '7d');
+							$result = $fitbit->get_body_time_series($data_type, $atts['date']->format('Y-m-d'), '7d');
 						}
 					}
 					else{
 						$output.='generated';
-						$steps = $fitbit->get_time_series('steps', date("Y-m-d"), '7d');
+						$result = $fitbit->get_body_time_series($data_type, date("Y-m-d"), '7d');
 					}
-					array_walk($steps, function (&$v, $k) { $v = array($v->dateTime, intval($v->value)); });
+					array_walk($result, function (&$v, $k) { $v = array($v->dateTime, intval($v->value)); });
 
 					// add header
-					array_unshift($steps, array('Date', 'Steps'));
+					array_unshift($result, array('Date', $data_title));
 
-					$steps_json = json_encode($steps);
+					$result_json = json_encode($result);
 
 					$output .= <<<ENDHTML
 		<script type="text/javascript">
 			google.load('visualization', '1.0', {'packages':['corechart', 'bar']});
 			google.setOnLoadCallback(function() {
-				var data = google.visualization.arrayToDataTable({$steps_json});
+				var data = google.visualization.arrayToDataTable({$result_json});
 				var options = {
-					title: 'Steps per day',
+					title: '{$data_title} per day',
 					hAxis: {
 					title: 'Date',
 					format: 'Y-m-d'
 					},
 					vAxis: {
-					title: 'Steps'
+					title: '{$data_title}'
 					}
 				};
-				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div_body_{$data_type}'));
 				chart.draw(data, options);
 			});
 
 		</script>
-		<div id="chart_div"></div>
+		<div id="chart_div_body_{$data_type}"></div>
 		ENDHTML;
 
-					// $output = print_r($steps, true);
+					// $output = print_r($distance, true);
 					return $output;
 				} catch(Exception $e) {
 					return print_r($e->getMessage(), true);
 				}
 			}
 		}
+	}
+	//[fp_bmi]
+	function fitpress_shortcode_bmi($atts){
+		return $this->fitpress_load_body_series($atts,"bmi");
+	}
+	//[fp_fat]
+	function fitpress_shortcode_fat($atts){
+		return $this->fitpress_load_body_series($atts,"fat");
+	}
+	//[fp_weight]
+	function fitpress_shortcode_weight($atts){
+		return $this->fitpress_load_body_series($atts,"weight");
+	}
+
+	//Activity base request
+	function fitpress_load_activity_series($atts, $data_type){
+
+		if (is_user_logged_in()){
+			$user_id = get_current_user_id();
+			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
+			if ($fitpress_credentials){
+				$atts = $this->fitpress_shortcode_base( $atts );
+
+				$fitbit = $this->get_fitbit_client();
+				$data_title=ucwords($data_type);
+				try {
+					$output = '';
+
+					if (array_key_exists('date',$atts) && $atts['date']){
+						if (is_string($atts['date'])){
+							$result = $fitbit->get_time_series($data_type, $atts['date'], '7d');
+						}
+						else{
+							$result = $fitbit->get_time_series($data_type, $atts['date']->format('Y-m-d'), '7d');
+						}
+					}
+					else{
+						$output.='generated';
+						$result = $fitbit->get_time_series($data_type, date("Y-m-d"), '7d');
+					}
+					array_walk($result, function (&$v, $k) { $v = array($v->dateTime, intval($v->value)); });
+
+					// add header
+					array_unshift($result, array('Date', $data_title));
+
+					$result_json = json_encode($result);
+
+					$output .= <<<ENDHTML
+		<script type="text/javascript">
+			google.load('visualization', '1.0', {'packages':['corechart', 'bar']});
+			google.setOnLoadCallback(function() {
+				var data = google.visualization.arrayToDataTable({$result_json});
+				var options = {
+					title: '{$data_title} per day',
+					hAxis: {
+					title: 'Date',
+					format: 'Y-m-d'
+					},
+					vAxis: {
+					title: '{$data_title}'
+					}
+				};
+				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div_{$data_type}'));
+				chart.draw(data, options);
+			});
+
+		</script>
+		<div id="chart_div_{$data_type}"></div>
+		ENDHTML;
+
+					// $output = print_r($distance, true);
+					return $output;
+				} catch(Exception $e) {
+					return print_r($e->getMessage(), true);
+				}
+			}
+		}
+	}
+
+	//[steps]
+	function fitpress_shortcode_steps( $atts ){
+		return $this->fitpress_load_activity_series($atts,"steps");
+	}
+	
+	//[distance]
+	function fitpress_shortcode_distance( $atts ){
+		return $this->fitpress_load_activity_series($atts, 'distance');
+	}
+
+	//[calories]
+	function fitpress_shortcode_calories( $atts ){
+		return $this->fitpress_load_activity_series($atts, 'calories');
 	}
 
 	// common functionality for shortcodes
