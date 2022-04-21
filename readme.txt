@@ -67,6 +67,8 @@ Activites: [fp_activites]
 Added fp_nutrition_info shortcode to display nutrition info
 Added fp_distance shortcode to display distance info
 Added fp_calories shortcode to display daily calorie info
+Added fp_bmi shortcode to display BMI
+Added fp_fat shortcode to display fat info
 
 = 0.5 =
 Added fp_profile shortcode to display Fitbit profile avatar and info.
