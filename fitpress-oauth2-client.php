@@ -25,7 +25,8 @@ class FitBit_API_Client {
 			$ret_key="foods-log-water";
 
 		}
-		return $this->get( "/1/user/-/foods/log/".$data_type."/date/".urlencode($date)."/7d.json" )->{$ret_key};
+		$ret = $this->get( "/1/user/-/foods/log/".$data_type."/date/".urlencode($date)."/7d.json" );
+		return $ret->{$ret_key};
 	}
 
 	public function get_body_time_series($series_type, $date, $range) {

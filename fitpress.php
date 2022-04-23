@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: FitPress
-Version: 0.6-alpha
-Description: Publish your FitBit statistics on your WordPress blog
+Version: 0.7-alpha
+Description: Publish FitBit statistics on WordPress
 Author: Duncan Bell, Daniel Walmsley
 Author URI: https://duncanbell.ca
 Plugin URI: https://github.com/duncan84/fitpress
@@ -239,11 +239,12 @@ class FitPress {
 			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
 			if ($fitpress_credentials){
 				$atts = $this->fitpress_shortcode_base( $atts );
+				print_r($atts);
 				$fitbit = $this->get_fitbit_client();
 				$date; 
 				$data_type="caloriesIn";
-				if (array_key_exists('data',$atts) && $atts['data']){
-					$data_type=$atts['data'];
+				if (array_key_exists('data_type',$atts) && $atts['data_type']){
+					$data_type=$atts['data_type'];
 				}
 				if (array_key_exists('date',$atts) && $atts['date']){
 					if (is_string($atts['date'])){
@@ -288,7 +289,7 @@ class FitPress {
 					title: {$y_title}
 					}
 				};
-				var chart = new google.visualization.ColumnChart(document.getElementById('{$data_type}'));
+				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div_{$data_type}'));
 				chart.draw(data, options);
 			});
 
@@ -467,6 +468,7 @@ class FitPress {
 		$atts = shortcode_atts( array(
 		    'date' => null
 			, 'data' => null
+			, 'data_type' => null
 		), $atts );
 
 		// we only compute this if not supplied because it's expensive to compute

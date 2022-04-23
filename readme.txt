@@ -63,6 +63,9 @@ Activites: [fp_activites]
 
 == Changelog ==
 
+= 0.7 = 
+Resolved issues with nutrition info shortcodes
+
 = 0.6 = 
 Added fp_nutrition_info shortcode to display nutrition info
 Added fp_distance shortcode to display distance info
