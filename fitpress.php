@@ -239,7 +239,6 @@ class FitPress {
 			$fitpress_credentials = get_user_meta( $user_id, 'fitpress_credentials', true );
 			if ($fitpress_credentials){
 				$atts = $this->fitpress_shortcode_base( $atts );
-				print_r($atts);
 				$fitbit = $this->get_fitbit_client();
 				$date; 
 				$data_type="caloriesIn";
